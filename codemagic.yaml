@@ -1,0 +1,24 @@
+workflows:
+  android-workflow:
+    name: HATY Android Build
+    max_build_duration: 30
+    instance_type: linux_x2
+    environment:
+      flutter: stable
+    scripts:
+      - name: Ensure Android platform files exist
+        script: |
+          if [ ! -d "android" ]; then
+            flutter create --platforms=android --org com.haty --project-name haty_reading_game .
+          fi
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Build debug APK (for quick install/testing)
+        script: flutter build apk --debug
+      - name: Build release APK
+        script: flutter build apk --release
+      - name: Build release AAB (for Play Store)
+        script: flutter build appbundle --release
+    artifacts:
+      - build/**/outputs/**/*.apk
+      - build/**/outputs/**/*.aab
