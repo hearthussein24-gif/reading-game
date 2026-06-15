@@ -14,7 +14,7 @@ workflows:
           echo "flutter.compileSdkVersion=36" >> android/local.properties
           echo "flutter.targetSdkVersion=36" >> android/local.properties
       - name: Get Flutter packages
-        script: flutter pub get
+        script: flutter pub get && find "$HOME/.pub-cache" -path "*/flutter_tts-*/android/build.gradle" -exec sed -i 's/compileSdkVersion [0-9]*/compileSdkVersion 36/' {} \;
       - name: Build debug APK (for quick install/testing)
         script: flutter build apk --debug
       - name: Build release APK
