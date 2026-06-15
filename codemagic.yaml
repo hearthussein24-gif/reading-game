@@ -11,6 +11,8 @@ workflows:
           if [ ! -d "android" ]; then
             flutter create --platforms=android --org com.haty --project-name haty_reading_game .
           fi
+          echo "flutter.compileSdkVersion=36" >> android/local.properties
+          echo "flutter.targetSdkVersion=36" >> android/local.properties
       - name: Get Flutter packages
         script: flutter pub get
       - name: Build debug APK (for quick install/testing)
