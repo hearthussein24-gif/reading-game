@@ -2,21 +2,20 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 
 void main() {
-  runApp(const HatyApp());
+  runApp(const HatyReadingGame());
 }
 
-class HatyApp extends StatelessWidget {
-  const HatyApp({super.key});
+class HatyReadingGame extends StatelessWidget {
+  const HatyReadingGame({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'HATY - Learn to Read',
+      title: 'HATY Reading Game',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorSchemeSeed: Colors.deepOrange,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFFFF8E7),
       ),
       home: const HomeScreen(),
     );
