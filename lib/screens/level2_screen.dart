@@ -4,8 +4,6 @@ import '../data/phonics_data.dart';
 import '../services/audio_service.dart';
 import '../widgets/sound_button.dart';
 
-/// Level 2: Same mechanic as Level 1, but with the 5 short vowel sounds.
-/// All 5 vowels are shown each round.
 class Level2Screen extends StatefulWidget {
   const Level2Screen({super.key});
 
@@ -15,8 +13,8 @@ class Level2Screen extends StatefulWidget {
 
 class _Level2ScreenState extends State<Level2Screen> {
   final Random _random = Random();
-  late LetterSound _target;
-  late List<LetterSound> _options;
+  late PhonicData _target;
+  late List<PhonicData> _options;
   int _score = 0;
   int _round = 1;
   String? _feedback;
@@ -35,11 +33,11 @@ class _Level2ScreenState extends State<Level2Screen> {
     setState(() {});
 
     Future.delayed(const Duration(milliseconds: 400), () {
-      AudioService.instance.speak(_target.soundText);
+      AudioService.playLetter(_target.audioFile);
     });
   }
 
-  void _checkAnswer(LetterSound chosen) {
+  void _checkAnswer(PhonicData chosen) {
     if (chosen.letter == _target.letter) {
       setState(() {
         _feedback = 'Great job! 🎉';
@@ -67,10 +65,11 @@ class _Level2ScreenState extends State<Level2Screen> {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            Text('Round $_round   •   Score: $_score', style: const TextStyle(fontSize: 18)),
+            Text('Round $_round   •   Score: $_score',
+                style: const TextStyle(fontSize: 18)),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => AudioService.instance.speak(_target.soundText),
+              onPressed: () => AudioService.playLetter(_target.audioFile),
               icon: const Icon(Icons.volume_up),
               label: const Text('Listen again'),
             ),
@@ -88,7 +87,7 @@ class _Level2ScreenState extends State<Level2Screen> {
               children: _options
                   .map((o) => SoundButton(
                         label: o.letter,
-                        spokenText: o.soundText,
+                        audioFile: o.audioFile,
                         color: Colors.blue,
                         onTap: () => _checkAnswer(o),
                       ))
@@ -101,7 +100,9 @@ class _Level2ScreenState extends State<Level2Screen> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: _feedback!.contains('Great') ? Colors.green : Colors.red,
+                  color: _feedback!.contains('Great')
+                      ? Colors.green
+                      : Colors.red,
                 ),
               ),
           ],
