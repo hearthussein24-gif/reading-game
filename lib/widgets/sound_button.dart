@@ -1,21 +1,16 @@
 import 'package:flutter/material.dart';
 import '../services/audio_service.dart';
 
-/// A big tappable letter/sound button.
-///
-/// Tapping it ALWAYS speaks [spokenText] (per game design: every sound
-/// button should play its sound when touched), and also fires [onTap]
-/// for any game-logic checks (e.g. "was this the right answer?").
 class SoundButton extends StatelessWidget {
   final String label;
-  final String spokenText;
+  final String audioFile;
   final VoidCallback? onTap;
   final Color color;
 
   const SoundButton({
     super.key,
     required this.label,
-    required this.spokenText,
+    required this.audioFile,
     this.onTap,
     this.color = Colors.deepOrange,
   });
@@ -24,7 +19,7 @@ class SoundButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        AudioService.instance.speak(spokenText);
+        AudioService.playLetter(audioFile);
         onTap?.call();
       },
       child: Container(
