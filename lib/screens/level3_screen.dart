@@ -4,9 +4,6 @@ import '../data/phonics_data.dart';
 import '../services/audio_service.dart';
 import '../widgets/sound_button.dart';
 
-/// Level 3: The game plays a blended consonant+vowel sound (e.g. "ba").
-/// The player must tap the correct consonant AND the correct vowel.
-/// Each button still speaks its own sound when tapped.
 class Level3Screen extends StatefulWidget {
   const Level3Screen({super.key});
 
@@ -16,11 +13,10 @@ class Level3Screen extends StatefulWidget {
 
 class _Level3ScreenState extends State<Level3Screen> {
   final Random _random = Random();
-  late Syllable _target;
-  late List<LetterSound> _consonantOptions;
-  late List<LetterSound> _vowelOptions;
-  late String _targetConsonant;
-  late String _targetVowel;
+  late PhonicData _targetConsonant;
+  late PhonicData _targetVowel;
+  late List<PhonicData> _consonantOptions;
+  late List<PhonicData> _vowelOptions;
   bool _consonantCorrect = false;
   bool _vowelCorrect = false;
   int _score = 0;
@@ -33,18 +29,11 @@ class _Level3ScreenState extends State<Level3Screen> {
     _newRound();
   }
 
-  LetterSound _findConsonant(String letter) =>
-      consonants.firstWhere((c) => c.letter == letter);
-
-  LetterSound _findVowel(String letter) =>
-      vowels.firstWhere((v) => v.letter == letter);
-
   void _newRound() {
-    _target = syllables[_random.nextInt(syllables.length)];
-    _targetConsonant = _target.consonant;
-    _targetVowel = _target.vowel;
+    _targetConsonant = consonants[_random.nextInt(consonants.length)];
+    _targetVowel = vowels[_random.nextInt(vowels.length)];
 
-    final cOptions = <LetterSound>{_findConsonant(_targetConsonant)};
+    final cOptions = <PhonicData>{_targetConsonant};
     while (cOptions.length < 3) {
       cOptions.add(consonants[_random.nextInt(consonants.length)]);
     }
@@ -58,12 +47,15 @@ class _Level3ScreenState extends State<Level3Screen> {
     setState(() {});
 
     Future.delayed(const Duration(milliseconds: 400), () {
-      AudioService.instance.speak(_target.soundText);
+      AudioService.playLetter(_targetConsonant.audioFile);
+      Future.delayed(const Duration(milliseconds: 800), () {
+        AudioService.playLetter(_targetVowel.audioFile);
+      });
     });
   }
 
-  void _checkConsonant(LetterSound chosen) {
-    if (chosen.letter == _targetConsonant) {
+  void _checkConsonant(PhonicData chosen) {
+    if (chosen.letter == _targetConsonant.letter) {
       setState(() => _consonantCorrect = true);
       _maybeComplete();
     } else {
@@ -71,8 +63,8 @@ class _Level3ScreenState extends State<Level3Screen> {
     }
   }
 
-  void _checkVowel(LetterSound chosen) {
-    if (chosen.letter == _targetVowel) {
+  void _checkVowel(PhonicData chosen) {
+    if (chosen.letter == _targetVowel.letter) {
       setState(() => _vowelCorrect = true);
       _maybeComplete();
     } else {
@@ -106,10 +98,16 @@ class _Level3ScreenState extends State<Level3Screen> {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            Text('Round $_round   •   Score: $_score', style: const TextStyle(fontSize: 18)),
+            Text('Round $_round   •   Score: $_score',
+                style: const TextStyle(fontSize: 18)),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: () => AudioService.instance.speak(_target.soundText),
+              onPressed: () {
+                AudioService.playLetter(_targetConsonant.audioFile);
+                Future.delayed(const Duration(milliseconds: 800), () {
+                  AudioService.playLetter(_targetVowel.audioFile);
+                });
+              },
               icon: const Icon(Icons.volume_up),
               label: const Text('Listen again'),
             ),
@@ -120,7 +118,8 @@ class _Level3ScreenState extends State<Level3Screen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            const Text('Consonant', style: TextStyle(fontSize: 14, color: Colors.grey)),
+            const Text('Consonant',
+                style: TextStyle(fontSize: 14, color: Colors.grey)),
             const SizedBox(height: 8),
             Wrap(
               spacing: 12,
@@ -129,8 +128,9 @@ class _Level3ScreenState extends State<Level3Screen> {
               children: _consonantOptions
                   .map((c) => SoundButton(
                         label: c.letter,
-                        spokenText: c.soundText,
-                        color: _consonantCorrect && c.letter == _targetConsonant
+                        audioFile: c.audioFile,
+                        color: _consonantCorrect &&
+                                c.letter == _targetConsonant.letter
                             ? Colors.green
                             : Colors.deepOrange,
                         onTap: () => _checkConsonant(c),
@@ -138,7 +138,8 @@ class _Level3ScreenState extends State<Level3Screen> {
                   .toList(),
             ),
             const SizedBox(height: 24),
-            const Text('Vowel', style: TextStyle(fontSize: 14, color: Colors.grey)),
+            const Text('Vowel',
+                style: TextStyle(fontSize: 14, color: Colors.grey)),
             const SizedBox(height: 8),
             Wrap(
               spacing: 12,
@@ -147,8 +148,9 @@ class _Level3ScreenState extends State<Level3Screen> {
               children: _vowelOptions
                   .map((v) => SoundButton(
                         label: v.letter,
-                        spokenText: v.soundText,
-                        color: _vowelCorrect && v.letter == _targetVowel
+                        audioFile: v.audioFile,
+                        color: _vowelCorrect &&
+                                v.letter == _targetVowel.letter
                             ? Colors.green
                             : Colors.blue,
                         onTap: () => _checkVowel(v),
@@ -162,7 +164,9 @@ class _Level3ScreenState extends State<Level3Screen> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: _feedback!.contains('Great') ? Colors.green : Colors.red,
+                  color: _feedback!.contains('Great')
+                      ? Colors.green
+                      : Colors.red,
                 ),
               ),
           ],
